@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 心灵伴侣</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fce4ec;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h2 {
+            color: #d81b60;
+        }
+        .input-field {
+            margin: 15px 0;
+            text-align: left;
+        }
+        .input-field input {
+            padding: 10px;
+            font-size: 1em;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .captcha {
+            font-weight: bold;
+            color: #d81b60;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        .refresh-btn {
+            background-color: #fce4ec;
+            border: none;
+            cursor: pointer;
+            color: #d81b60;
+            font-size: 0.9em;
+        }
+        .login-button {
+            background-color: #1aad19;
+            color: white;
+            font-size: 1.2em;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .login-button:hover {
+            background-color: #158d12;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>登录心灵伴侣</h2>
+
+    <!-- 用户名和密码输入区域 -->
+    <div class="input-field">
+        <label for="username">用户名：</label>
+        <input type="text" id="username" placeholder="请输入用户名">
+    </div>
+    <div class="input-field">
+        <label for="password">密码：</label>
+        <input type="password" id="password" placeholder="请输入密码">
+    </div>
+
+    <!-- 验证码输入区域 -->
+    <div class="input-field">
+        <label for="captcha-input">验证码：</label>
+        <div class="captcha-container">
+            <span id="captcha" class="captcha"></span>
+            <button class="refresh-btn" onclick="generateCaptcha()">换一张</button>
+        </div>
+        <input type="text" id="captcha-input" placeholder="输入验证码">
+        <div id="error-message" class="error-message">用户名、密码或验证码错误，请重新输入！</div>
+    </div>
+
+    <!-- 登录按钮 -->
+    <button class="login-button" onclick="validateLogin()">登录</button>
+</div>
+
+<script>
+    let captchaText = '';
+    const validUsername = 'admin'; // 预设的用户名
+    const validPassword = '123456'; // 预设的密码
+
+    // 生成随机验证码
+    function generateCaptcha() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        captchaText = '';
+        for (let i = 0; i < 5; i++) {
+            captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('captcha').innerText = captchaText;
+        document.getElementById('error-message').style.display = 'none'; // 隐藏错误信息
+    }
+
+    // 验证登录逻辑
+    function validateLogin() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const captchaInput = document.getElementById('captcha-input').value;
+
+        if (username === validUsername && password === validPassword && captchaInput === captchaText) {
+            // 验证成功，跳转到聊天页面
+            window.location.href = "chatroom.html";
+        } else {
+            // 显示错误提示并刷新验证码
+            document.getElementById('error-message').style.display = 'block';
+            generateCaptcha();
+            document.getElementById('captcha-input').value = ''; // 清空验证码输入框
+        }
+    }
+
+    // 页面加载时生成验证码
+    window.onload = generateCaptcha;
+</script>
+
+</body>
+</html>

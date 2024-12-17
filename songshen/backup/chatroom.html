@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+          <div class="avatar">
+            <img src="image/chatroom-title.png" alt="聊天室" class="chatroom-title" width="200" height="200">
+          </div>
+        </div>
+    </header>
+
+    <section class="chat">
+        <div class="chat-window">
+            <!-- 消息展示区域 -->
+            <div class="messages" id="messages">
+                <div class="message"><strong>虚拟女性:</strong> 你好呀！很高兴和你聊天。</div>
+            </div>
+
+            <!-- 输入框和按钮 -->
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="请输入消息...">
+                <button id="send-btn">发送</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p id="footer-text">谢谢你来到这里，让我们一起分享温暖和快乐。</p>
+        <div class="social-icons">
+            <a href="#" class="social-icon"><img src="image/wechat-icon.png" alt="微信"></a>
+            <a href="#" class="social-icon"><img src="image/xiaohongshu-icon.png" alt="小红书"></a>
+            <a href="#" class="social-icon"><img src="image/douyin-icon.png" alt="抖音"></a>
+        </div>
+    </footer>
+
+    <!-- JavaScript 实现消息发送和接口调用 -->
+    <script>
+        // 设置 API URL 和 API Key
+        const apiURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+        const apiKey = "5a4f842859289def1cd293e56562a4e3.Df85Vd0Ecoj1oiER";  // 提供的 API Key
+
+        // 模拟接口调用，获取虚拟女性的回复
+        async function getReplyFromAPI(userMessage) {
+            try {
+                const response = await fetch(apiURL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "glm-4",
+                        messages: [
+                            {
+                                "role": "user",
+                                "content": userMessage
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if (data && data.choices && data.choices[0]) {
+                    return data.choices[0].message.content;  // 返回机器人的回复内容
+                }
+                return "抱歉，我现在无法回复，请稍后再试。";
+            } catch (error) {
+                console.error("接口调用失败:", error);
+                return "抱歉，我现在无法回复，请稍后再试。";
+            }
+        }
+
+        // 消息发送逻辑
+        document.getElementById("send-btn").addEventListener("click", async function() {
+            const userInput = document.getElementById("user-input");
+            const message = userInput.value.trim();
+            const messagesContainer = document.getElementById("messages");
+
+            if (message !== "") {
+                // 添加用户消息到聊天窗口
+                const userMessage = document.createElement("div");
+                userMessage.className = "message";
+                userMessage.innerHTML = `<strong>你:</strong> ${message}`;
+                messagesContainer.appendChild(userMessage);
+
+                // 清空输入框
+                userInput.value = "";
+
+                // 调用接口获取回复
+                const reply = await getReplyFromAPI(message);
+
+                // 显示接口返回的消息
+                const botMessage = document.createElement("div");
+                botMessage.className = "message";
+                botMessage.innerHTML = `<strong>虚拟女性:</strong> ${reply}`;
+                messagesContainer.appendChild(botMessage);
+
+                // 滚动到底部
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom, #fce4ec, #f8bbd0); /* 浅粉色渐变背景 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header .avatar img {
+            width: 150px;
+            height: auto;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 聊天区域样式 */
+        .chat {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .chat-window {
+            width: 90%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 消息展示区域 */
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message strong {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .message strong img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        /* 用户消息气泡 */
+        .message-user {
+            align-self: flex-end;
+            background: #e0e0e0;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 15px 15px 0 15px;
+            max-width: 70%;
+            text-align: left;
+        }
+
+        /* 虚拟女性消息气泡 */
+        .message-bot {
+            align-self: flex-start;
+            background: #fce4ec; /* 浅粉色消息气泡 */
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 15px 15px 15px 0;
+            max-width: 70%;
+            text-align: left;
+        }
+
+        /* 输入框和按钮 */
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #f0f4f8;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #send-btn {
+            background: linear-gradient(to right, #f06292, #ec407a);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        #send-btn:hover {
+            background: linear-gradient(to right, #ec407a, #d81b60);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 消息动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="avatar">
+            <img src="image/chatroom-title.png" alt="聊天室">
+        </div>
+    </header>
+
+    <section class="chat">
+        <div class="chat-window">
+            <div class="messages" id="messages">
+                <div class="message message-bot">
+                    <strong>
+                        <img src="image/chatroom-title.png" alt="妮娜头像"> 妮娜:
+                    </strong>
+                    你好呀！很高兴和你聊天。
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="请输入消息...">
+                <button id="send-btn">发送</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript 实现消息发送和接口调用 -->
+    <script>
+        const apiURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+        const apiKey = "5a4f842859289def1cd293e56562a4e3.Df85Vd0Ecoj1oiER";
+
+        async function getReplyFromAPI(userMessage) {
+            try {
+                const response = await fetch(apiURL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "glm-4",
+                        messages: [
+                            {
+                                "role": "user",
+                                "content": userMessage
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if (data && data.choices && data.choices[0]) {
+                    return data.choices[0].message.content;
+                }
+                return "抱歉，我现在无法回复，请稍后再试。";
+            } catch (error) {
+                console.error("接口调用失败:", error);
+                return "抱歉，我现在无法回复，请稍后再试。";
+            }
+        }
+
+        document.getElementById("send-btn").addEventListener("click", async function() {
+            const userInput = document.getElementById("user-input");
+            const message = userInput.value.trim();
+            const messagesContainer = document.getElementById("messages");
+
+            if (message !== "") {
+                // 添加用户消息
+                const userMessage = document.createElement("div");
+                userMessage.className = "message message-user";
+                userMessage.innerHTML = `<strong>你:</strong> ${message}`;
+                messagesContainer.appendChild(userMessage);
+
+                userInput.value = "";
+
+                // 获取妮娜回复
+                const reply = await getReplyFromAPI(message);
+
+                const botMessage = document.createElement("div");
+                botMessage.className = "message message-bot";
+                botMessage.innerHTML = `
+                    <strong>
+                        <img src="image/chatroom-title.png" alt="妮娜头像"> 妮娜:
+                    </strong> ${reply}`;
+                messagesContainer.appendChild(botMessage);
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
